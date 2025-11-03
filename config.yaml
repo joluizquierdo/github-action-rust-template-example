@@ -1,0 +1,14 @@
+# This file is part of joluizquierdo/github-action-rust-template.
+# Copyright (C) 2025 joluizquierdo
+# Licensed under the GNU GPL v3. See LICENSE file in root directory.
+---
+action_name: "Your action name here"
+description: "A brief description of your action."
+author: "Your Name"
+rust:
+  edition: "2024"
+  version: "0.1.0"
+  name: "rust-action"
+  target: "x86_64-unknown-linux-gnu"
+github:
+  runner: "ubuntu-latest" # could be "[self-hosted, XXXX]"
