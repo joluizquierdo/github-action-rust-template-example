@@ -13,7 +13,7 @@ permissions:
 jobs:
   create-release:
     name: Create GitHub Release 🏷️
-    runs-on: {{ github.runner }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -21,12 +21,9 @@ jobs:
       - name: Check if release already exists 🔍
         id: check_release
         env:
-          GITHUB_TOKEN: {%raw %}${{ secrets.GITHUB_TOKEN }}
-{%endraw %}
-          TAG_NAME: {%raw %}${{ github.ref_name }}
-{%endraw %}
-          REPO_NAME: {%raw %}${{ github.repository }}
-{%endraw %}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+          REPO_NAME: ${{ github.repository }}
         run: |
           set +e # Disable exit on error to handle the case where release does not exist
 
@@ -41,13 +38,10 @@ jobs:
       - name: Create GitHub Release 🚀
         if: steps.check_release.outputs.is_created == 'false'
         env:
-          GITHUB_TOKEN: {%raw %}${{ secrets.GITHUB_TOKEN }}
-{%endraw %}
-          TAG_NAME: {%raw %}${{ github.ref_name }}
-{%endraw %}
-          REPO_NAME: {%raw %}${{ github.repository }}
-{%endraw %}
-          CHANGELOG_PATH: {{ github.changelog_path | default('CHANGELOG.md') }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+          REPO_NAME: ${{ github.repository }}
+          CHANGELOG_PATH: CHANGELOG.md
         run: |
           if [ ! -f "$CHANGELOG_PATH" ]; then
             echo "::warning::Changelog file not found at path: $CHANGELOG_PATH, using default realese notes."
@@ -68,8 +62,8 @@ jobs:
         #   rustup target list
         # please make sure the os is able to build for the target
         include:
-          - target: {{ rust.target | default('x86_64-unknown-linux-gnu') }} 
-            os: {{ github.runner }}
+          - target: x86_64-unknown-linux-gnu 
+            os: ubuntu-latest
             features: ""
           # other targets examples for macos and windows
           # - target: x86_64-pc-windows-gnu
@@ -80,23 +74,20 @@ jobs:
           #   features: ""
 
 
-    runs-on: {%raw %}${{ matrix.os }}
-{%endraw %}
+    runs-on: ${{ matrix.os }}
     needs: create-release
     defaults:
       run:
-        working-directory: {%raw %}${{ github.workspace }}/rust-action
-{%endraw %}
+        working-directory: ${{ github.workspace }}/rust-action
     env:
-      BINARY_NAME: {{ rust.name }}
+      BINARY_NAME: rust-action
     steps:
       - uses: actions/checkout@v5
 
       - name: Set up Rust 🔧
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          target: {%raw %}${{ matrix.target }}
-{%endraw %}
+          target: ${{ matrix.target }}
           components: rustfmt, clippy
 
       - name: Format check 🖌️
@@ -113,10 +104,8 @@ jobs:
 
       - name: Build ⚙️
         env:
-          TARGET: {%raw %}${{ matrix.target }}
-{%endraw %}
-          FEATURES: {%raw %}${{ matrix.features }}
-{%endraw %}
+          TARGET: ${{ matrix.target }}
+          FEATURES: ${{ matrix.features }}
         shell: bash
         run: |
           cargo build \
@@ -127,16 +116,11 @@ jobs:
 
       - name: Upload Release Binary 📦
         env:
-          GITHUB_TOKEN: {%raw %}${{ secrets.GITHUB_TOKEN }}
-{%endraw %}
-          TARGET: {%raw %}${{ matrix.target }}
-{%endraw %}
-          REPO_NAME: {%raw %}${{ github.repository }}
-{%endraw %}
-          TAG_NAME: {%raw %}${{ github.ref_name }}
-{%endraw %}
-          OS: {%raw %}${{ matrix.os }}
-{%endraw %}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET: ${{ matrix.target }}
+          REPO_NAME: ${{ github.repository }}
+          TAG_NAME: ${{ github.ref_name }}
+          OS: ${{ matrix.os }}
         shell: bash
         run: |
           asset_path="target/${TARGET}/release"
@@ -172,4 +156,3 @@ jobs:
             --repo "${REPO_NAME}" \
             "${binary_compressed_name}" \
             --clobber
-

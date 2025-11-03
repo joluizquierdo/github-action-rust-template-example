@@ -1,11 +1,6 @@
-{#
-This file is part of joluizquierdo/github-action-rust-template.
-Copyright (C) 2025 joluizquierdo
-Licensed under the GNU GPL v3. See LICENSE file in root directory.
-#}
-name: "{{ action_name }}"
-description: "{{ description }}"
-author: "{{ author }}"
+name: "Your action name here"
+description: "A brief description of your action."
+author: "Your Name"
 inputs:
   github-token:
     description: "GitHub token for authentication."
@@ -31,16 +26,14 @@ inputs:
 outputs:
   greeting-message:
     description: "The complete greeting message."
-    value: {%raw %}"${{ steps.rust_binary.outputs.greeting-message }}"
-{%endraw %}
+    value: "${{ steps.rust_binary.outputs.greeting-message }}"
 runs:
   using: "composite"
   steps:
     - name: "Set up environment variables"
       shell: bash
       env:
-        RUNNER_OS: {%raw %}${{ runner.os }}
-{%endraw %}
+        RUNNER_OS: ${{ runner.os }}
       run: |
         if [[ "$RUNNER_OS" == "Windows" ]]; then
           OS_NAME="windows"
@@ -54,14 +47,10 @@ runs:
         fi
 
         echo "OS_NAME=${OS_NAME}" >> "$GITHUB_ENV"
-        echo "GITHUB_TOKEN={%raw %}${{ inputs.github-token }}" >> "$GITHUB_ENV"
-{%endraw %}
-        echo "ARTIFACT_OWNER={%raw %}${{ inputs.artifact-owner }}" >> "$GITHUB_ENV"
-{%endraw %}
-        echo "ARTIFACT_REPOSITORY={%raw %}${{ inputs.artifact-repository }}" >> "$GITHUB_ENV"
-{%endraw %}
-        echo "ARTIFACT_VERSION={%raw %}${{ inputs.artifact-version }}" >> "$GITHUB_ENV"
-{%endraw %}
+        echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> "$GITHUB_ENV"
+        echo "ARTIFACT_OWNER=${{ inputs.artifact-owner }}" >> "$GITHUB_ENV"
+        echo "ARTIFACT_REPOSITORY=${{ inputs.artifact-repository }}" >> "$GITHUB_ENV"
+        echo "ARTIFACT_VERSION=${{ inputs.artifact-version }}" >> "$GITHUB_ENV"
         echo "GITHUB_API_URL=https://api.github.com" >> "$GITHUB_ENV"
         echo "GITHUB_API_VERSION=2022-11-28" >> "$GITHUB_ENV"
         echo "ARTIFACT_PATH=./artifact_download" >> "$GITHUB_ENV"
@@ -130,15 +119,11 @@ runs:
       shell: bash
       id: rust_binary
       env:
-        BINARY_PATH: {%raw %}${{ steps.download_binary.outputs.binary_path }}
-{%endraw %}
-        NAME: {%raw %}"${{ inputs.name }}"
-{%endraw %}
-        SURNAME: {%raw %}"${{ inputs.surname }}"
-{%endraw %}
+        BINARY_PATH: ${{ steps.download_binary.outputs.binary_path }}
+        NAME: "${{ inputs.name }}"
+        SURNAME: "${{ inputs.surname }}"
       run: |
         echo "::debug::Running the rust binary at '${BINARY_PATH}'"
         "${BINARY_PATH}" \
           --name "${NAME}" \
           --surname "${SURNAME}"
-
